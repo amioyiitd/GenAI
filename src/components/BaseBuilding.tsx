@@ -1,5 +1,6 @@
 import { Building, Resources } from '@/types/game';
 import { Hammer, Plus, ArrowUpCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const AVAILABLE_BUILDINGS = [
   { id: 'hq', name: 'Hero Headquarters', baseCost: { metal: 100, energy: 50, crystals: 10 } },
@@ -25,14 +26,18 @@ export function BaseBuilding({ buildings, resources, onBuild, onUpgrade }: BaseB
   };
 
   return (
-    <div className="bg-slate-900 rounded-xl p-6 border border-slate-700 shadow-xl">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-slate-900 rounded-xl p-6 border border-slate-700 shadow-xl"
+    >
       <div className="flex items-center gap-3 mb-6 border-b border-slate-700 pb-4">
         <Hammer className="w-6 h-6 text-orange-400" />
         <h2 className="text-2xl font-bold text-white">Base Construction</h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {AVAILABLE_BUILDINGS.map((template) => {
+        {AVAILABLE_BUILDINGS.map((template, index) => {
           const existingBuilding = buildings.find(b => b.id === template.id);
           const currentCost = existingBuilding
             ? {
@@ -45,7 +50,14 @@ export function BaseBuilding({ buildings, resources, onBuild, onUpgrade }: BaseB
           const affordable = canAfford(currentCost);
 
           return (
-            <div key={template.id} className="bg-slate-800 rounded-lg p-5 border border-slate-700 flex flex-col">
+            <motion.div
+              key={template.id}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: index * 0.1 }}
+              whileHover={{ y: -5 }}
+              className="bg-slate-800 rounded-lg p-5 border border-slate-700 flex flex-col shadow-lg"
+            >
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h3 className="font-bold text-lg text-white">{template.name}</h3>
@@ -70,27 +82,31 @@ export function BaseBuilding({ buildings, resources, onBuild, onUpgrade }: BaseB
 
               <div className="mt-auto">
                 {existingBuilding ? (
-                  <button
+                  <motion.button
+                    whileHover={affordable ? { scale: 1.02 } : {}}
+                    whileTap={affordable ? { scale: 0.98 } : {}}
                     onClick={() => onUpgrade(template.id)}
                     disabled={!affordable}
                     className="w-full py-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-50 text-white rounded font-medium flex items-center justify-center gap-2 transition-colors"
                   >
                     <ArrowUpCircle className="w-4 h-4" /> Upgrade
-                  </button>
+                  </motion.button>
                 ) : (
-                  <button
+                  <motion.button
+                    whileHover={affordable ? { scale: 1.02 } : {}}
+                    whileTap={affordable ? { scale: 0.98 } : {}}
                     onClick={() => onBuild(template.id, template.name, currentCost)}
                     disabled={!affordable}
                     className="w-full py-2 bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white rounded font-medium flex items-center justify-center gap-2 transition-colors"
                   >
                     <Plus className="w-4 h-4" /> Construct
-                  </button>
+                  </motion.button>
                 )}
               </div>
-            </div>
+            </motion.div>
           );
         })}
       </div>
-    </div>
+    </motion.div>
   );
 }

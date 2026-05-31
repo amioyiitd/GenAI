@@ -8,6 +8,9 @@ import { RegionView } from "@/components/RegionView";
 import { BaseBuilding } from "@/components/BaseBuilding";
 import { HeroProgression } from "@/components/HeroProgression";
 import { Gamepad2, Settings, User } from "lucide-react";
+import { Toaster, toast } from 'sonner';
+
+const EMOJI_OPTIONS = ["🤖", "🛡️", "⚡", "🦅", "🔥", "🧊", "🌪️", "🌟"];
 
 export default function Home() {
   const { state, dispatch } = useGameState();
@@ -15,6 +18,8 @@ export default function Home() {
   // Local UI State
   const [heroName, setHeroName] = useState("");
   const [heroClass, setHeroClass] = useState<HeroClass>("Tech Builder");
+  const [heroAppearance, setHeroAppearance] = useState(EMOJI_OPTIONS[0]);
+  const [heroPersonality, setHeroPersonality] = useState("Brave");
   const [activeTab, setActiveTab] = useState<"map" | "base" | "heroes">("map");
   const [selectedRegionId, setSelectedRegionId] = useState<string | null>(null);
 
@@ -28,11 +33,14 @@ export default function Home() {
         id: Date.now().toString(),
         name: heroName,
         heroClass,
+        appearance: heroAppearance,
+        personality: heroPersonality,
         level: 1,
         xp: 0,
         abilities: ["Basic Attack"],
       },
     });
+    toast.success(`Welcome to the HeroVerse, ${heroName}!`);
   };
 
   const selectedRegion = selectedRegionId
@@ -43,14 +51,21 @@ export default function Home() {
     // Randomly find resources or get minor xp
     const findResources = Math.random() > 0.5;
     if (findResources) {
+      const foundMetal = Math.floor(Math.random() * 20) + 10;
+      const foundEnergy = Math.floor(Math.random() * 15) + 5;
+      const foundCrystals = Math.floor(Math.random() * 5);
+
       dispatch({
         type: "ADD_RESOURCES",
         payload: {
-          metal: Math.floor(Math.random() * 20) + 10,
-          energy: Math.floor(Math.random() * 15) + 5,
-          crystals: Math.floor(Math.random() * 5)
+          metal: foundMetal,
+          energy: foundEnergy,
+          crystals: foundCrystals
         }
       });
+      toast(`Found resources! +${foundMetal} Metal, +${foundEnergy} Energy`, { icon: '🔍' });
+    } else {
+       toast("Nothing found this time, keep looking!", { icon: '👀' });
     }
 
     if (state.activeHeroId) {
@@ -60,10 +75,16 @@ export default function Home() {
 
   const handleSolve = (regionId: string) => {
     dispatch({ type: "PROGRESS_STORY", payload: { regionId, progress: 20 } });
+    toast.success(`Story Progressed!`, { icon: '⚡' });
+
+    const region = state.regions.find(r => r.id === regionId);
 
     // Unlock new regions based on progress
-    if (regionId === "base" && state.regions.find(r => r.id === "base")?.storyProgress === 100) {
+    if (regionId === "base" && region?.storyProgress === 80) { // Will become 100
       dispatch({ type: "UNLOCK_REGION", payload: "crystal_forest" });
+      toast.success("New Region Unlocked: Crystal Forest!", { icon: '🗺️' });
+    } else if (region?.storyProgress === 80) {
+      toast.success("Villain Defeated! Region Secured.", { icon: '🏆' });
     }
 
     if (state.activeHeroId) {
@@ -108,6 +129,33 @@ export default function Home() {
               </select>
             </div>
 
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Appearance</label>
+              <div className="flex gap-2 flex-wrap">
+                {EMOJI_OPTIONS.map(emoji => (
+                  <button
+                    key={emoji}
+                    type="button"
+                    onClick={() => setHeroAppearance(emoji)}
+                    className={`text-3xl p-2 rounded-lg transition-all ${heroAppearance === emoji ? 'bg-blue-500/20 border border-blue-500 scale-110' : 'bg-slate-800 border border-transparent hover:bg-slate-700'}`}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Personality</label>
+              <input
+                type="text"
+                value={heroPersonality}
+                onChange={(e) => setHeroPersonality(e.target.value)}
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors"
+                placeholder="e.g., Brave, Curious, Logical"
+              />
+            </div>
+
             <button
               type="submit"
               className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg px-4 py-4 transition-colors shadow-lg shadow-blue-500/20"
@@ -123,6 +171,7 @@ export default function Home() {
   // MAIN GAME UI (Acts 2-5)
   return (
     <main className="min-h-screen bg-slate-950 text-slate-200">
+      <Toaster theme="dark" position="top-right" />
       {/* Top Navigation Bar */}
       <nav className="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">

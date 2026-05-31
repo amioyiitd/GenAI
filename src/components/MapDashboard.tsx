@@ -1,5 +1,6 @@
 import { Region } from '@/types/game';
 import { Map, Lock, MapPin } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface MapDashboardProps {
   regions: Region[];
@@ -8,19 +9,28 @@ interface MapDashboardProps {
 
 export function MapDashboard({ regions, onSelectRegion }: MapDashboardProps) {
   return (
-    <div className="bg-slate-900 rounded-xl p-6 border border-slate-700 shadow-xl">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-slate-900 rounded-xl p-6 border border-slate-700 shadow-xl"
+    >
       <div className="flex items-center gap-3 mb-6 border-b border-slate-700 pb-4">
         <Map className="w-6 h-6 text-blue-400" />
         <h2 className="text-2xl font-bold text-white">World Map</h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {regions.map((region) => (
-          <button
+        {regions.map((region, index) => (
+          <motion.button
             key={region.id}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: index * 0.1 }}
+            whileHover={region.isUnlocked ? { scale: 1.05 } : {}}
+            whileTap={region.isUnlocked ? { scale: 0.95 } : {}}
             disabled={!region.isUnlocked}
             onClick={() => onSelectRegion(region.id)}
-            className={`relative p-4 rounded-lg border-2 transition-all flex flex-col items-center justify-center text-center h-32
+            className={`relative p-4 rounded-lg border-2 transition-colors flex flex-col items-center justify-center text-center h-32
               ${
                 region.isUnlocked
                   ? 'border-blue-500/50 bg-blue-900/20 hover:border-blue-400 hover:bg-blue-800/30 cursor-pointer'
@@ -48,9 +58,9 @@ export function MapDashboard({ regions, onSelectRegion }: MapDashboardProps) {
                 />
               </div>
             )}
-          </button>
+          </motion.button>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 }

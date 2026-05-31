@@ -89,9 +89,21 @@ export function useGameState() {
 
                 // Add abilities based on level (Act 5 progression)
                 const abilities = [...h.abilities];
-                if (newLevel >= 10 && !abilities.includes('Advanced Skill')) abilities.push('Advanced Skill');
-                if (newLevel >= 25 && !abilities.includes('Team Attack')) abilities.push('Team Attack');
-                if (newLevel >= 50 && !abilities.includes('Legendary Form')) abilities.push('Legendary Form');
+
+                // Add specific skills based on class
+                if (h.heroClass === 'Tech Builder') {
+                    if (newLevel >= 10 && !abilities.includes('Drone Swarm')) abilities.push('Drone Swarm');
+                    if (newLevel >= 25 && !abilities.includes('Orbital Strike')) abilities.push('Orbital Strike');
+                    if (newLevel >= 50 && !abilities.includes('Quantum Armor')) abilities.push('Quantum Armor');
+                } else if (h.heroClass === 'Guardian') {
+                    if (newLevel >= 10 && !abilities.includes('Shield Bash')) abilities.push('Shield Bash');
+                    if (newLevel >= 25 && !abilities.includes('Aegis Field')) abilities.push('Aegis Field');
+                    if (newLevel >= 50 && !abilities.includes('Titan Form')) abilities.push('Titan Form');
+                } else {
+                    if (newLevel >= 10 && !abilities.includes('Shadow Step')) abilities.push('Shadow Step');
+                    if (newLevel >= 25 && !abilities.includes('Sonic Dash')) abilities.push('Sonic Dash');
+                    if (newLevel >= 50 && !abilities.includes('Astral Projection')) abilities.push('Astral Projection');
+                }
 
                 return { ...h, xp: newXp, level: newLevel, abilities };
               }

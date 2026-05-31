@@ -4,6 +4,8 @@ export interface Hero {
   id: string;
   name: string;
   heroClass: HeroClass;
+  appearance: string; // Emoji or visual identifier
+  personality: string;
   level: number;
   xp: number;
   abilities: string[];
